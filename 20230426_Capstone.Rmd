@@ -1,0 +1,68 @@
+---
+title: "20230426_Capstone"
+author: "Imaduddin"
+date: "2023-04-26"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# CASE STUDY : SUPERSTORE DATA SET
+
+## LIBRARY
+
+```{r  library, message=FALSE, warning=FALSE}
+library(ggplot2) #for visual
+library(tidyverse)
+library(janitor)
+library(dplyr)
+library(lubridate) #wrangle data attributes
+library(skimr) #get summary
+```
+
+## DATA PREPARATION
+```{r read csv, message=FALSE, warning=FALSE}
+superstore <- read_csv("superstore.csv")
+colnames(superstore)
+```
+
+## DATA INSPECTION & RECAP
+```{r check str summary, message=FALSE, warning=FALSE}
+str(superstore)
+summary(superstore)
+```
+
+
+# CLEANING
+```{r cleaning, message=FALSE, warning=FALSE}
+superstore_clean <- mutate(superstore,"Postal Code"=as.character("Postal Code"))
+superstore_clean$"Order Date"<- strptime(as.character(superstore_clean$"Order Date"), "%d/%m/%Y")
+superstore_clean$"Ship Date"<- strptime(as.character(superstore_clean$"Ship Date"), "%d/%m/%Y")
+superstore_clean$Discount <- as.numeric(gsub('\\$|,', '', superstore_clean$Discount))
+superstore_clean$"Discount to Sales Ratio" <- as.numeric(gsub('\\%|,', '', superstore_clean$"Discount to Sales Ratio"))
+superstore_clean$Profit <- as.numeric(gsub('\\$|,', '', superstore_clean$Profit))
+superstore_clean$"Profit Ratio" <- as.numeric(gsub('\\%|,', '', superstore_clean$"Profit Ratio"))
+superstore_clean$Sales <- as.numeric(gsub('\\$|,', '', superstore_clean$Sales))
+
+#rename column
+superstore_clean <- superstore_clean %>%
+  rename(postal_code="Postal Code", profit_ratio="Profit Ratio",discount_to_sales_ratio="Discount to Sales Ratio",order_date="Order Date",ship_date="Ship Date")
+
+colnames(superstore_clean)
+str(superstore_clean)
+summary(superstore_clean)
+skim(superstore_clean)
+```
+## SAVE TO CSV
+```{r write to CSV, message=FALSE, warning=FALSE}
+write.csv(superstore_clean, "superstore_clean.csv")
+```
+
+## SCATTER PLOT
+```{r ggplot for visualization, message=FALSE, warning=FALSE}
+ggplot(data = superstore_clean) +
+  geom_point(mapping = aes(x = Sales, y = Profit))
+
+```
